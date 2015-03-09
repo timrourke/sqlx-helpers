@@ -16,12 +16,12 @@ func CreateWhere(model interface{}, pairs map[string]interface{}) (string, map[s
 	modelType := reflect.TypeOf(model)
 
 	for key, values := range pairs {
-		col := key
+		col := strings.ToLower(key)
 		field, ok := modelType.FieldByName(key)
 		if ok {
 			col = field.Tag.Get("db")
 			if col == "" {
-				col = key
+				col = strings.ToLower(key)
 			}
 		}
 

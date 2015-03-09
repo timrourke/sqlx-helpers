@@ -49,10 +49,10 @@ func TestNoTags(t *testing.T) {
 	}
 
 	where, expanded := CreateWhere(model, data)
-	if !strings.ContainsAny(where, "Id in (:Id0,:Id1)") {
+	if !strings.ContainsAny(where, "id in (:Id0,:Id1)") {
 		t.Error("Incorrect where: " + where)
 	}
-	if !strings.ContainsAny(where, "Name = :Name") {
+	if !strings.ContainsAny(where, "name = :Name") {
 		t.Error("Incorrect where: " + where)
 	}
 
