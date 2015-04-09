@@ -1,13 +1,15 @@
 package helper
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
 
 type DeclaredTag struct {
-	Id   string `db:"diff_id"`
-	Name string `db:"diff_name"`
+	Id     string `db:"diff_id"`
+	Name   string `db:"diff_name"`
+	Ignore string `db:"-"`
 }
 
 type NoTag struct {
@@ -69,7 +71,13 @@ func TestInsertDeclaredTags(t *testing.T) {
 
 	insert := CreateInsert(model)
 
-	if !strings.ContainsAny(insert, "(diff_id, diff_name) values (:diff_id, :diff_name)") {
+	fmt.Println(insert)
+
+	if strings.Contains(insert, ":-") {
+		t.Error("Incorrect insert: " + insert)
+	}
+
+	if !strings.Contains(insert, "(diff_id, diff_name) values (:diff_id, :diff_name)") {
 		t.Error("Incorrect insert: " + insert)
 	}
 }
@@ -79,7 +87,7 @@ func TestInsertNoTags(t *testing.T) {
 
 	insert := CreateInsert(model)
 
-	if !strings.ContainsAny(insert, "(id, name) values (:Id, :Name)") {
+	if !strings.Contains(insert, "(id, name) values (:Id, :Name)") {
 		t.Error("Incorrect insert: " + insert)
 	}
 }
@@ -89,7 +97,7 @@ func TestUpdateDeclaredTags(t *testing.T) {
 
 	update := CreateUpdate(model)
 
-	if !strings.ContainsAny(update, "diff_id=:diff_id, diff_name=:diff_name") {
+	if !strings.Contains(update, "diff_id=:diff_id, diff_name=:diff_name") {
 		t.Error("Incorrect update: " + update)
 	}
 }
@@ -99,7 +107,7 @@ func TestUpdateNoTags(t *testing.T) {
 
 	update := CreateUpdate(model)
 
-	if !strings.ContainsAny(update, "id=:Id, name=:Name") {
+	if !strings.Contains(update, "id=:Id, name=:Name") {
 		t.Error("Incorrect update: " + update)
 	}
 }

@@ -66,7 +66,9 @@ func createInsertOrUpdate(model interface{}, insert bool) string {
 	for i := 0; i < modelType.NumField(); i++ {
 		field := modelType.Field(i)
 		col := field.Tag.Get("db")
-		if col == "" {
+		if col == "-" {
+			continue
+		} else if col == "" {
 			columns = append(columns, strings.ToLower(field.Name))
 			names = append(names, ":"+field.Name)
 		} else {
@@ -79,7 +81,7 @@ func createInsertOrUpdate(model interface{}, insert bool) string {
 	}
 
 	update := []string{}
-	for i := 0; i < modelType.NumField(); i++ {
+	for i := 0; i < len(columns); i++ {
 		update = append(update, columns[i]+"="+names[i])
 	}
 	return strings.Join(update, ", ")
