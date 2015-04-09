@@ -15,7 +15,7 @@ type NoTag struct {
 	Name string
 }
 
-func TestDeclaredTag(t *testing.T) {
+func TestWhereDeclaredTag(t *testing.T) {
 	model := DeclaredTag{}
 
 	data := map[string]interface{}{
@@ -40,7 +40,7 @@ func TestDeclaredTag(t *testing.T) {
 	}
 }
 
-func TestNoTags(t *testing.T) {
+func TestWhereNoTags(t *testing.T) {
 	model := NoTag{}
 
 	data := map[string]interface{}{
@@ -61,5 +61,45 @@ func TestNoTags(t *testing.T) {
 	}
 	if _, ok := expanded["Id1"]; !ok {
 		t.Error("Incorrect expanded")
+	}
+}
+
+func TestInsertDeclaredTags(t *testing.T) {
+	model := DeclaredTag{}
+
+	insert := CreateInsert(model)
+
+	if !strings.ContainsAny(insert, "(diff_id, diff_name) values (:diff_id, :diff_name)") {
+		t.Error("Incorrect insert: " + insert)
+	}
+}
+
+func TestInsertNoTags(t *testing.T) {
+	model := NoTag{}
+
+	insert := CreateInsert(model)
+
+	if !strings.ContainsAny(insert, "(id, name) values (:Id, :Name)") {
+		t.Error("Incorrect insert: " + insert)
+	}
+}
+
+func TestUpdateDeclaredTags(t *testing.T) {
+	model := DeclaredTag{}
+
+	update := CreateUpdate(model)
+
+	if !strings.ContainsAny(update, "diff_id=:diff_id, diff_name=:diff_name") {
+		t.Error("Incorrect update: " + update)
+	}
+}
+
+func TestUpdateNoTags(t *testing.T) {
+	model := NoTag{}
+
+	update := CreateUpdate(model)
+
+	if !strings.ContainsAny(update, "id=:Id, name=:Name") {
+		t.Error("Incorrect update: " + update)
 	}
 }

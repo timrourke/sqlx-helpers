@@ -42,3 +42,45 @@ func CreateWhere(model interface{}, pairs map[string]interface{}) (string, map[s
 
 	return "where " + strings.Join(parts, " and "), expanded
 }
+
+// Given a struct create an insert statement for it
+// eg.
+// (id, name, stuff) values (:id, :name, :stuff)
+func CreateInsert(model interface{}) string {
+	return createInsertOrUpdate(model, true)
+}
+
+// Given a struct create an update statement for it
+// eg.
+// id = :id, name = :name, stuff = :stuff
+func CreateUpdate(model interface{}) string {
+	return createInsertOrUpdate(model, false)
+}
+
+func createInsertOrUpdate(model interface{}, insert bool) string {
+	modelType := reflect.TypeOf(model)
+
+	columns := []string{}
+	names := []string{}
+
+	for i := 0; i < modelType.NumField(); i++ {
+		field := modelType.Field(i)
+		col := field.Tag.Get("db")
+		if col == "" {
+			columns = append(columns, strings.ToLower(field.Name))
+			names = append(names, ":"+field.Name)
+		} else {
+			columns = append(columns, col)
+			names = append(names, ":"+col)
+		}
+	}
+	if insert {
+		return "(" + strings.Join(columns, ", ") + ") values (" + strings.Join(names, ", ") + ")"
+	}
+
+	update := []string{}
+	for i := 0; i < modelType.NumField(); i++ {
+		update = append(update, columns[i]+"="+names[i])
+	}
+	return strings.Join(update, ", ")
+}
