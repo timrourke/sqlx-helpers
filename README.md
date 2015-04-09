@@ -1,4 +1,4 @@
-# sqlx-where-helper
-Golang SQLX named query where in helper
+# sqlx-helpers
+Golang SQLX query generators
 
 Check tests for examples

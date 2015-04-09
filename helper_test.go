@@ -111,3 +111,19 @@ func TestUpdateNoTags(t *testing.T) {
 		t.Error("Incorrect update: " + update)
 	}
 }
+
+func TestExclude(t *testing.T) {
+	model := DeclaredTag{}
+
+	update := CreateUpdate(model, "diff_id")
+
+	if strings.Contains(update, "diff_id") {
+		t.Error("Incorrect update: " + update)
+	}
+
+	insert := CreateInsert(model, "diff_name")
+
+	if strings.Contains(insert, "diff_name") {
+		t.Error("Incorrect insert: " + insert)
+	}
+}

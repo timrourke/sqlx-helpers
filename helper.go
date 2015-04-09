@@ -46,18 +46,18 @@ func CreateWhere(model interface{}, pairs map[string]interface{}) (string, map[s
 // Given a struct create an insert statement for it
 // eg.
 // (id, name, stuff) values (:id, :name, :stuff)
-func CreateInsert(model interface{}) string {
-	return createInsertOrUpdate(model, true)
+func CreateInsert(model interface{}, exclude ...string) string {
+	return createInsertOrUpdate(model, true, exclude)
 }
 
 // Given a struct create an update statement for it
 // eg.
 // id = :id, name = :name, stuff = :stuff
-func CreateUpdate(model interface{}) string {
-	return createInsertOrUpdate(model, false)
+func CreateUpdate(model interface{}, exclude ...string) string {
+	return createInsertOrUpdate(model, false, exclude)
 }
 
-func createInsertOrUpdate(model interface{}, insert bool) string {
+func createInsertOrUpdate(model interface{}, insert bool, exclude []string) string {
 	modelType := reflect.TypeOf(model)
 
 	columns := []string{}
@@ -66,7 +66,7 @@ func createInsertOrUpdate(model interface{}, insert bool) string {
 	for i := 0; i < modelType.NumField(); i++ {
 		field := modelType.Field(i)
 		col := field.Tag.Get("db")
-		if col == "-" {
+		if col == "-" || contains(exclude, col) {
 			continue
 		} else if col == "" {
 			columns = append(columns, strings.ToLower(field.Name))
@@ -85,4 +85,13 @@ func createInsertOrUpdate(model interface{}, insert bool) string {
 		update = append(update, columns[i]+"="+names[i])
 	}
 	return strings.Join(update, ", ")
+}
+
+func contains(s []string, e string) bool {
+	for _, ex := range s {
+		if e == ex {
+			return true
+		}
+	}
+	return false
 }
