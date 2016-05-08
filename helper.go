@@ -43,22 +43,24 @@ func CreateWhere(model interface{}, pairs map[string]interface{}) (string, map[s
 	return "where " + strings.Join(parts, " and "), expanded
 }
 
-// Given a struct create an insert statement for it
+// Given a struct, create an insert statement for it.
 // eg.
-// (id, name, stuff) values (:id, :name, :stuff)
+// (id, name, stuff) values (?, ?, ?)
 func CreateInsert(model interface{}, exclude ...string) string {
 	return createInsertOrUpdate(model, true, exclude)
 }
 
-// Given a struct create an update statement for it
+// Given a struct, create an update statement for it.
 // eg.
-// id = :id, name = :name, stuff = :stuff
+// id = ?, name = ?, stuff = ?
 func CreateUpdate(model interface{}, exclude ...string) string {
 	return createInsertOrUpdate(model, false, exclude)
 }
 
 func createInsertOrUpdate(model interface{}, insert bool, exclude []string) string {
 	modelType := reflect.TypeOf(model)
+	modelField := modelType.Field(0)
+	tableName := modelField.Tag.Get("tableName")
 
 	columns := []string{}
 	names := []string{}
@@ -70,21 +72,20 @@ func createInsertOrUpdate(model interface{}, insert bool, exclude []string) stri
 			continue
 		} else if col == "" {
 			columns = append(columns, strings.ToLower(field.Name))
-			names = append(names, ":"+field.Name)
 		} else {
 			columns = append(columns, col)
-			names = append(names, ":"+col)
 		}
+		names = append(names, "?")
 	}
 	if insert {
-		return "(" + strings.Join(columns, ", ") + ") values (" + strings.Join(names, ", ") + ")"
+		return "INSERT INTO " + tableName + " (" + strings.Join(columns, ", ") + ") values (" + strings.Join(names, ", ") + ")"
 	}
 
 	update := []string{}
 	for i := 0; i < len(columns); i++ {
 		update = append(update, columns[i]+"="+names[i])
 	}
-	return strings.Join(update, ", ")
+	return "UPDATE " + tableName + " SET " + strings.Join(update, ", ")
 }
 
 func contains(s []string, e string) bool {
